@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Components</title>
+</head>
+
+<body>
+    <!-- Custom Elements -->
+    <my-custom-component></my-custom-component>
+
+    <!-- Shadow DOM -->
+    <div>
+        <template id="example" shadowrootmode="open">
+            <h1>Hello, world!</h1>
+        </template>
+    </div>
+
+    <!-- Templates -->
+    <template id="book-template">
+        <li><span class="title"></span> &mdash; <span class="author"></span></li>
+    </template>
+
+    <template id="book-template-2">
+        <li><span class="author"></span>'s classic novel <span class="title"></span></li>
+    </template>
+
+    <ul id="books"></ul>
+
+    <fieldset id="templates">
+        <legend>Choose template</legend>
+
+        <label>
+            <input type="radio" name="template" value="book-template" checked>
+            <span>Template One</span>
+        </label>
+        <label>
+            <input type="radio" name="template" value="book-template-2">
+            <span>Template Two</span>
+        </label>
+    </fieldset>
+
+    <script src="intro.js"></script>
+</body>
+
+</html>

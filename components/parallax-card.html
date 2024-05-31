@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parallax Card Effect</title>
+</head>
+
+<body>
+    <h1>Parllax/rotation card effect based on cursor position</h1>
+    <p>Based on Steam "trading cards"</p>
+    <hr>
+
+    <div class="container">
+        <parallax-card id="card">
+            <span>Hello world</span>
+        </parallax-card>
+    </div>
+
+    <div class="container">
+        <parallax-card id="card">
+            <img src="https://picsum.photos/120/160">
+        </parallax-card>
+    </div>
+
+    <!-- TODO: Consider moving styles into custom element, should that be done by <template>? -->
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            background-color: #FFF;
+            overflow: hidden;
+        }
+
+        .container {
+            margin: 5rem;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        #card {
+            background-color: #333;
+            color: #FFF;
+            width: 120px;
+            height: 160px;
+            border-radius: 5px;
+            transition: .2s;
+            box-shadow: 0 0 0 0 rgba(51, 51, 51, 0.5);
+            overflow: hidden;
+        }
+    </style>
+
+    <script src="parallax-card.js"></script>
+</body>
+
+</html>
