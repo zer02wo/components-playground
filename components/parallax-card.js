@@ -11,6 +11,37 @@ class ParallaxCard extends HTMLElement {
         this.addEventListener('pointerleave', this.pointerInteractionEndCallback);
 
         // TODO: Implement with gyroscope as well: https://developer.mozilla.org/en-US/docs/Web/API/Gyroscope
+        // TODO: Orientation emulation does not appear to work on desktop chrome due to 'NotReadableError'
+        const gyroscope = new Gyroscope({ frequency: 60 });
+
+        Promise.resolve(navigator.permissions.query({ name: 'gyroscope' }))
+            .then((result) => {
+                if (result.state !== 'granted') {
+                    console.error('No permissions to use Gyroscope.');
+
+                    return;
+                }
+
+                gyroscope.addEventListener('reading', (e) => {
+                    // TODO: Temp to allow reading values on mobile
+                    const debugEl = document.getElementById('debug');
+
+                    let debugLog = `<span>X-axis ${gyroscope.x}</span>`;
+                    debugLog += `<span>Y-axis ${gyroscope.y}</span>`;
+                    debugLog += `<span>Z-axis ${gyroscope.z}</span>`;
+
+                    debugEl.innerHTML = debugLog;
+                });
+
+                gyroscope.onerror = (event) => {
+                    if (event.error.name === 'NotReadableError') {
+                        console.error('Sensor is not available.');
+                        console.debug(event);
+                    }
+                };
+
+                gyroscope.start();
+            });
     }
 
     initialiseBounds () {
