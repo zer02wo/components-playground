@@ -1,34 +1,45 @@
 class ParallaxCard extends HTMLElement {
+    #centerX;
+    #centerY;
+
     connectedCallback () {
+        this.initialiseBounds();
+        window.addEventListener('resize', this.initialiseBounds.bind(this));
+
+        // Mouse & touch pointer events
+        this.addEventListener('pointermove', this.pointerInteractionCallback);
+        this.addEventListener('pointerleave', this.pointerInteractionEndCallback);
+
+        // TODO: Implement with gyroscope as well: https://developer.mozilla.org/en-US/docs/Web/API/Gyroscope
+    }
+
+    initialiseBounds () {
         const bounds = this.getBoundingClientRect();
-        const centerX = bounds.left + (bounds.width / 2);
-        const centerY = bounds.top + (bounds.height / 2);
 
-        this.addEventListener('mousemove', (e) => {
-            const rotationX = this.calculateParallaxRotation(e.y, centerY);
-            const rotationY = this.calculateParallaxRotation(e.x, centerX);
+        this.#centerX = bounds.left + (bounds.width / 2);
+        this.#centerY = bounds.top + (bounds.height / 2);
+    }
 
-            // perspective() = distance to object = distance to vanishing point
-            // Like in art: closer to the vanishing point, the more extreme the perspective
-                // I.e. crazy foreshortening - 300px seems like a nice balance
-            // Value of 'none' or high enough effectively becomes 2D/orthographic
+    pointerInteractionCallback (e) {
+        const rotationX = this.calculateParallaxRotation(e.y, this.#centerY);
+        const rotationY = this.calculateParallaxRotation(e.x, this.#centerX);
 
-            this.style.transform = `perspective(300px)
-                rotateX(${rotationX}deg)
-                rotateY(${rotationY}deg)
-                scale(1.5)`;
+        // perspective() = distance to object = distance to vanishing point
+        // Like in art: closer to the vanishing point, the more extreme the perspective
+            // I.e. crazy foreshortening - 300px seems like a nice balance
+        // Value of 'none' or high enough effectively becomes 2D/orthographic
 
-            this.style.boxShadow = this.calculateShadowCast(rotationX, rotationY);
-        });
+        this.style.transform = `perspective(300px)
+            rotateX(${rotationX}deg)
+            rotateY(${rotationY}deg)
+            scale(1.5)`;
 
-        this.addEventListener('mouseleave', (e) => {
-            this.style.transform = 'none';
-            // I probably should reset boxShadow here, but I quite like that it ends up somewhere random
-        });
+        this.style.boxShadow = this.calculateShadowCast(rotationX, rotationY);
+    }
 
-        // TODO: Think about how to make this work on mobile
-            // TODO: touch events at a minimum?
-            // TODO: Maybe with accelerometer as well? https://developer.mozilla.org/en-US/docs/Web/API/Accelerometer
+    pointerInteractionEndCallback (e) {
+        this.style.transform = 'none';
+        // I probably should reset boxShadow here, but I quite like that it ends up somewhere random
     }
 
     // TODO: Refactor this to use a % value, rather than pixel distance - supports any card size
