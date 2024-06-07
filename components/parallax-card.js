@@ -10,38 +10,8 @@ class ParallaxCard extends HTMLElement {
         this.addEventListener('pointermove', this.pointerInteractionCallback);
         this.addEventListener('pointerleave', this.pointerInteractionEndCallback);
 
-        // TODO: Implement with gyroscope as well: https://developer.mozilla.org/en-US/docs/Web/API/Gyroscope
-        // TODO: Orientation emulation does not appear to work on desktop chrome due to 'NotReadableError'
-        const gyroscope = new Gyroscope({ frequency: 60 });
-
-        Promise.resolve(navigator.permissions.query({ name: 'gyroscope' }))
-            .then((result) => {
-                if (result.state !== 'granted') {
-                    console.error('No permissions to use Gyroscope.');
-
-                    return;
-                }
-
-                gyroscope.addEventListener('reading', (e) => {
-                    // TODO: Temp to allow reading values on mobile
-                    const debugEl = document.getElementById('debug');
-
-                    let debugLog = `<span>X-axis ${gyroscope.x}</span>`;
-                    debugLog += `<span>Y-axis ${gyroscope.y}</span>`;
-                    debugLog += `<span>Z-axis ${gyroscope.z}</span>`;
-
-                    debugEl.innerHTML = debugLog;
-                });
-
-                gyroscope.onerror = (event) => {
-                    if (event.error.name === 'NotReadableError') {
-                        console.error('Sensor is not available.');
-                        console.debug(event);
-                    }
-                };
-
-                gyroscope.start();
-            });
+        // Use RelativeOrientationSensor API for parallax effect
+        this.initialiseOrientationSensorRotation();
     }
 
     initialiseBounds () {
@@ -89,6 +59,39 @@ class ParallaxCard extends HTMLElement {
         // TODO: Setting shade by element/image colour would be cool
         // TODO: Maybe applying a filter/overlay of some kind where the cursor is to make it seem like a light source??
         return `${-rotationY}px ${-rotationX}px ${blur}px ${shade}`;
+    }
+
+    initialiseOrientationSensorRotation () {
+        // TODO: Implement card rotation with RelativeOrientationSensor:
+        // https://developer.mozilla.org/en-US/docs/Web/API/RelativeOrientationSensor/RelativeOrientationSensor
+        const options = { frequency: 60, referenceFrame: "device" };
+        const sensor = new RelativeOrientationSensor(options);
+
+        Promise.all([
+            navigator.permissions.query({ name: "accelerometer" }),
+            navigator.permissions.query({ name: "gyroscope" }),
+        ]).then((results) => {
+            if (results.every((result) => result.state !== 'granted')) {
+                console.error('No permissions to use RelativeOrientationSensor.');
+
+                return;
+            }
+
+            sensor.addEventListener('reading', (e) => {
+                // TODO: Temp to research quaternion to euler/CSS-friendly rotation
+                console.log(e);
+                console.log(sensor);
+            });
+
+            sensor.addEventListener('error', (e) => {
+                if (e.error.name === 'NotReadableError') {
+                    console.error('Sensor is not available.');
+                    console.debug(e);
+                }
+            });
+
+            sensor.start();
+        });
     }
 }
 
