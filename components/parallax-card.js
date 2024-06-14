@@ -10,7 +10,7 @@ class ParallaxCard extends HTMLElement {
         this.addEventListener('pointermove', this.pointerInteractionCallback);
         this.addEventListener('pointerleave', this.pointerInteractionEndCallback);
 
-        // Use RelativeOrientationSensor API for parallax effect
+        // Use DeviceOrientation event for rotation effect
         this.initialiseOrientationSensorRotation();
     }
 
@@ -46,7 +46,7 @@ class ParallaxCard extends HTMLElement {
     // TODO: Refactor this to use a % value, rather than pixel distance - supports any card size
     calculateParallaxRotation (cursorPos, centerPos, maxAngle = 30) {
         // Calculate angle of rotation based on cursor position
-        const direction = Math.sign(cursorPos - centerPos) || 1;
+        const direction = Math.sign(cursorPos - centerPos);
         const magnitude = Math.abs(cursorPos - centerPos);
         // maxAngle to prevent card content being obscured
         const rotation = Math.min(magnitude, maxAngle);
@@ -62,36 +62,47 @@ class ParallaxCard extends HTMLElement {
     }
 
     initialiseOrientationSensorRotation () {
-        // TODO: Implement card rotation with RelativeOrientationSensor:
-        // https://developer.mozilla.org/en-US/docs/Web/API/RelativeOrientationSensor/RelativeOrientationSensor
-        const options = { frequency: 60, referenceFrame: "device" };
-        const sensor = new RelativeOrientationSensor(options);
+        // RelativeOrientationSensor would be better for mobile support - as currently relative to angle on page load
+        // however, this sensor does not seem to emulate within desktop Chrome devtools
 
-        Promise.all([
-            navigator.permissions.query({ name: "accelerometer" }),
-            navigator.permissions.query({ name: "gyroscope" }),
-        ]).then((results) => {
-            if (results.every((result) => result.state !== 'granted')) {
-                console.error('No permissions to use RelativeOrientationSensor.');
+        window.addEventListener('deviceorientation', (e) => {
+            const [rotationX, rotationY] = this.calculateOrientationRotation(e.alpha, e.beta, e.gamma);
 
-                return;
-            }
+            this.style.transform = `perspective(300px)
+                rotateX(${rotationX}deg)
+                rotateY(${rotationY}deg)
+                scale(1.5)`;
 
-            sensor.addEventListener('reading', (e) => {
-                // TODO: Temp to research quaternion to euler/CSS-friendly rotation
-                console.log(e);
-                console.log(sensor);
-            });
-
-            sensor.addEventListener('error', (e) => {
-                if (e.error.name === 'NotReadableError') {
-                    console.error('Sensor is not available.');
-                    console.debug(e);
-                }
-            });
-
-            sensor.start();
+            this.style.boxShadow = this.calculateShadowCast(rotationX, rotationY);
         });
+
+        // This is an imperfect solution.
+        // For a more accurate/mathematical approach to this, overcoming problems like gimbal lock, see:
+        // https://stackoverflow.com/a/56681378
+    }
+
+    // Not using quaternion/euler/matrix rotation to limit complexity
+    // Approximation calculated here is working for my use case where one axis is ignored
+    calculateOrientationRotation (alpha, beta, gamma, maxAngle = 45) {
+        // Assuming device is intended to be displayed portrait
+        const angleX = 90 - beta;
+        const magnitudeX = Math.abs(angleX);
+        const directionX = Math.sign(angleX);
+        const rotationX = Math.min(magnitudeX, maxAngle) * directionX;
+
+        // Use gamma angle for vector with alpha angle
+        let angleY = alpha + gamma;
+
+        // Limit rotation to a plane
+        if (Math.abs(angleY) >= 180) {
+            angleY = (angleY % 180) - 180;
+        }
+
+        const magnitudeY = Math.abs(angleY);
+        const directionY = Math.sign(angleY);
+        const rotationY = Math.min(magnitudeY, maxAngle) * directionY;
+
+        return [rotationX, rotationY];
     }
 }
 
