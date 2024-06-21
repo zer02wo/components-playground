@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Components</title>
+</head>
+
+<body>
+    <!-- Most basic example -->
+    <template>
+        <h1>Hello, world!</h1>
+    </template>
+
+    <!-- Versatility example -->
+    <template id="btn-template">
+        <script>
+            const button = document.getElementById('click-me');
+            button.addEventListener('click', (event) => console.log(event));
+        </script>
+        <style>
+            #click-me {
+            all: unset;
+            background: tomato;
+            border: 0;
+            border-radius: 4px;
+            color: white;
+            font-family: Helvetica;
+            font-size: 1.5rem;
+            padding: .5rem 1rem;
+            }
+        </style>
+
+        <button id="click-me">Log click event</button>
+    </template>
+
+    <!-- Complex example - dialog -->
+    <template id="dialog-template">
+        <script>
+            document.getElementById('launch-dialog').addEventListener('click', () => {
+                const wrapper = document.querySelector('.wrapper');
+                const closeButton = document.querySelector('button.close');
+                const wasFocused = document.activeElement;
+
+                wrapper.classList.add('open');
+                closeButton.focus();
+
+                closeButton.addEventListener('click', () => {
+                    wrapper.classList.remove('open');
+                    wasFocused.focus();
+                });
+            });
+        </script>
+        <style>
+            .wrapper {
+                opacity: 0;
+                transition: visibility 0s, opacity 0.25s ease-in;
+            }
+            .wrapper:not(.open) {
+                visibility: hidden;
+            }
+            .wrapper.open {
+                align-items: center;
+                display: flex;
+                justify-content: center;
+                height: 100vh;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                opacity: 1;
+                visibility: visible;
+            }
+            .overlay {
+                background: rgba(0, 0, 0, 0.8);
+                height: 100%;
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+            }
+            .dialog {
+                background: #ffffff;
+                max-width: 600px;
+                padding: 1rem;
+                position: fixed;
+            }
+            button {
+                all: unset;
+                cursor: pointer;
+                font-size: 1.25rem;
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+            }
+            button:focus {
+                border: 2px solid blue;
+            }
+        </style>
+        <div class="wrapper">
+            <div class="overlay"></div>
+            <div class="dialog" role="dialog" aria-labelledby="title" aria-describedby="content">
+                <button class="close" aria-label="Close">&#x2716;&#xfe0f;</button>
+                <h1 id="title">Hello world</h1>
+                <div id="content" class="content">
+                <p>This is content in the body of our modal</p>
+            </div>
+        </div>
+      </template>
+      <!-- Because styles from <template> are applied globally, we need to override the launch button styles here -->
+      <style>
+        #launch-dialog {
+            background: tomato;
+            border-radius: 4px;
+            color: #fff;
+            font-family: Helvetica, Arial, sans-serif;
+            padding: 0.5rem 1rem;
+            position: static;
+        }
+      </style>
+      <button id="launch-dialog">Launch dialog</button>
+
+    <script src="template.js"></script>
+</body>
+
+</html>
