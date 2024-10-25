@@ -31,7 +31,7 @@ class OneDialog extends HTMLElement {
         // Unattach event listeners
         this.querySelector('button').removeEventListener('click', this.close);
         this.querySelector('.overlay').removeEventListener('click', this.close);
-    }  
+    }
 
     // Following getter/setters ensure the open attribute (on HTML element)
     // is synced with the property (on the DOM object)

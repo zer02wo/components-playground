@@ -14,6 +14,11 @@ class ParallaxCard extends HTMLElement {
         this.initialiseOrientationSensorRotation();
     }
 
+    disconnectedCallback() {
+        this.removeEventListener('pointermove', this.pointerInteractionCallback);
+        this.removeEventListener('pointerleave', this.pointerInteractionEndCallback);
+    }
+
     initialiseBounds () {
         const bounds = this.getBoundingClientRect();
 
